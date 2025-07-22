@@ -44,14 +44,15 @@ async def crop(
     with in_path.open("wb") as f:
         f.write(await file.read())
     crop_gif(in_path, out_path, left, top, width, height)
-    return {"download_url": f"/download/{out_path.name}"}
+    return {"preview_url": f"/preview/{out_path.name}"}
 
-@app.get("/download/{name}")
-async def download(name: str):
+@app.get("/preview/{name}")
+async def preview(name: str):
     path = UPLOAD / name
     if not path.exists():
         raise HTTPException(404, "Fichier introuvable")
-    return FileResponse(path, media_type="image/gif", filename="cropped.gif")
+    # Pas de filename → le navigateur l’affiche au lieu de le télécharger
+    return FileResponse(path, media_type="image/gif")
 
 @app.get("/")
 async def root():
