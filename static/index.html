@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>GIF Cropper</title>
+  <style>
+    body{font-family:Arial;margin:2rem;background:#f5f5f5}
+    #preview{max-width:100%;border:1px solid #ccc;background:#fff}
+    #selection{position:absolute;border:2px dashed #0af;background:rgba(0,170,255,.2);
+               pointer-events:none;display:none}
+    .btn{background:#0af;color:#fff;border:none;padding:.5rem 1rem;margin:.5rem 0;
+         cursor:pointer;border-radius:4px}
+  </style>
+</head>
+<body>
+  <h1>GIF Cropper</h1>
+  <input type="file" id="fileInput" accept="image/gif">
+  <br>
+  <div style="position:relative;display:inline-block" id="wrapper">
+    <img id="preview">
+    <div id="selection"></div>
+  </div>
+  <br>
+  <button class="btn" id="cropBtn" disabled>Recadrer</button>
+  <img id="result" style="max-width:100%;margin-top:1rem;display:none" alt="GIF recadré"/>
+
+<script>
+const fileIn  = document.getElementById('fileInput');
+const preview = document.getElementById('preview');
+const sel     = document.getElementById('selection');
+const cropBtn = document.getElementById('cropBtn');
+const result  = document.getElementById('result');
+
+let scaleX, scaleY;
+let rectData = { l:0, t:0, w:0, h:0 };   // holds native-pixel crop box
+
+fileIn.onchange = e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  preview.src = url;
+  preview.onload = () => {
+    scaleX = preview.naturalWidth  / preview.width;
+    scaleY = preview.naturalHeight / preview.height;
+    sel.style.display = 'block';
+    cropBtn.disabled  = false;
+  };
+};
+
+let down = false, sx0 = 0, sy0 = 0;
+
+preview.onmousedown = e => {
+  down = true;
+  const rect = preview.getBoundingClientRect();
+  sx0 = e.clientX - rect.left;
+  sy0 = e.clientY - rect.top;
+};
+
+preview.onmousemove = e => {
+  if (!down) return;
+  const rect = preview.getBoundingClientRect();
+  const x1 = e.clientX - rect.left;
+  const y1 = e.clientY - rect.top;
+
+  const l = Math.min(sx0, x1);
+  const t = Math.min(sy0, y1);
+  const w = Math.abs(x1 - sx0);
+  const h = Math.abs(y1 - sy0);
+
+  Object.assign(sel.style, { left:l+'px', top:t+'px', width:w+'px', height:h+'px', display:'block' });
+
+  // store CSS pixels for immediate use
+  rectData = { l, t, w, h };
+};
+
+preview.onmouseup = () => down = false;
+
+cropBtn.onclick = async () => {
+  if (!rectData.w || !rectData.h) return;
+
+  const form = new FormData();
+  form.append('file', fileIn.files[0]);
+  form.append('left',   Math.round(rectData.l * scaleX));
+  form.append('top',    Math.round(rectData.t * scaleY));
+  form.append('width',  Math.round(rectData.w * scaleX));
+  form.append('height', Math.round(rectData.h * scaleY));
+
+  const res = await fetch('/crop', { method:'POST', body:form }).then(r => r.json());
+  result.src = res.preview_url;
+  result.style.display = 'inline-block';
+};
+</script>
+</body>
+</html>
