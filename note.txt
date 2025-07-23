@@ -1,0 +1,34 @@
+Tâches et points à surveiller pour ton cropper de GIF sur Railway :
+
+1. Limite de RAM/CPU
+- Optimiser le traitement des GIFs (traiter frame par frame, limiter la taille des fichiers acceptés)
+- Ajouter une limite de taille d'upload côté serveur
+
+2. Limite de stockage
+- Vérifier si des fichiers sont stockés sur Railway (dossier upload/)
+- Prévoir un nettoyage automatique ou une solution de stockage externe si besoin
+
+3. Mise en veille
+- Railway gratuit peut mettre l'app en veille après inactivité
+- Mettre en place un système de "ping" régulier si besoin de disponibilité 24/7
+
+4. Scalabilité
+- Scalabilité = capacité à gérer plus d'utilisateurs sans planter
+- Sur le gratuit, un seul conteneur : attention si beaucoup d'utilisateurs simultanés
+
+5. Sécurité
+- Limiter la taille et le nombre d'uploads
+- Ajouter une vérification du type de fichier
+- Protéger contre le spam (ex : captcha, limite de requêtes)
+
+6. Compatibilité mobile
+- Tester l'interface sur téléphone
+- Adapter le CSS pour le responsive si besoin
+
+---
+Tâches à faire :
+- [ ] Limiter la taille des GIFs acceptés
+- [ ] Nettoyer régulièrement le dossier upload/
+- [ ] Ajouter des protections contre le spam/abus
+- [ ] Tester et améliorer l'affichage sur mobile
+- [ ] (Optionnel) Mettre en place un système de ping pour éviter la mise en veille

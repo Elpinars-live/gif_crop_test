@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <title>GIF Cropper</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body{font-family:Arial;margin:2rem;background:#f5f5f5}
     #preview{max-width:100%;border:1px solid #ccc;background:#fff}
@@ -74,6 +75,35 @@ preview.onmousemove = e => {
 };
 
 preview.onmouseup = () => down = false;
+
+// --- Touch events for mobile ---
+preview.addEventListener('touchstart', function(e) {
+  if (e.touches.length !== 1) return;
+  down = true;
+  const rect = preview.getBoundingClientRect();
+  sx0 = e.touches[0].clientX - rect.left;
+  sy0 = e.touches[0].clientY - rect.top;
+  e.preventDefault();
+}, { passive: false });
+
+preview.addEventListener('touchmove', function(e) {
+  if (!down || e.touches.length !== 1) return;
+  const rect = preview.getBoundingClientRect();
+  const x1 = e.touches[0].clientX - rect.left;
+  const y1 = e.touches[0].clientY - rect.top;
+  const l = Math.min(sx0, x1);
+  const t = Math.min(sy0, y1);
+  const w = Math.abs(x1 - sx0);
+  const h = Math.abs(y1 - sy0);
+  Object.assign(sel.style, { left:l+'px', top:t+'px', width:w+'px', height:h+'px', display:'block' });
+  rectData = { l, t, w, h };
+  e.preventDefault();
+}, { passive: false });
+
+preview.addEventListener('touchend', function(e) {
+  down = false;
+  e.preventDefault();
+}, { passive: false });
 
 cropBtn.onclick = async () => {
   if (!rectData.w || !rectData.h) return;
